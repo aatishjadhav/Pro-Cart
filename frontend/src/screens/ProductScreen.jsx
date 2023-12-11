@@ -23,11 +23,18 @@ import { addToCart } from "../slices/cartSlice";
 
 const ProductScreen = () => {
   const { id: productId } = useParams();
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const [qty, setQty] = useState(1);
+  const increaseQty = () => {
+    setQty((prevQty) => prevQty + 1);
+  };
+
+  const decreaseQty = () => {
+    setQty((prevQty) => (prevQty > 1 ? prevQty - 1 : 1));
+  };
+
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
 
@@ -42,11 +49,21 @@ const ProductScreen = () => {
     useCreateReviewMutation();
 
   const { userInfo } = useSelector((state) => state.auth);
+  const cartItems = useSelector((state) => state.cart.cartItems);
+
 
   const addToCartHandler = () => {
-    dispatch(addToCart({ ...product, qty }));
+    const existingItem = cartItems.find((item) => item._id === product._id);
+
+    if (existingItem) {
+      dispatch(addToCart({ ...product, qty: existingItem.qty + qty }));
+    } else {
+      dispatch(addToCart({ ...product, qty }));
+    }
+
     navigate("/cart");
   };
+  
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -96,7 +113,7 @@ const ProductScreen = () => {
                     text={`${product.numReviews} reviews`}
                   />
                 </ListGroup.Item>
-                <ListGroup.Item>Price: ${product.price}</ListGroup.Item>
+                <ListGroup.Item>Price: ${product.price * qty}</ListGroup.Item>
                 <ListGroup.Item>
                   Description: {product.description}
                 </ListGroup.Item>
@@ -109,7 +126,7 @@ const ProductScreen = () => {
                     <Row>
                       <Col>Price:</Col>
                       <Col>
-                        <strong>${product.price}</strong>
+                        <strong>${product.price * qty}</strong>
                       </Col>
                     </Row>
                   </ListGroup.Item>
@@ -131,19 +148,13 @@ const ProductScreen = () => {
                       <Row>
                         <Col>Qty</Col>
                         <Col>
-                          <Form.Control
-                            as="select"
-                            value={qty}
-                            onChange={(e) => setQty(Number(e.target.value))}
-                          >
-                            {[...Array(product.countInStock).keys()].map(
-                              (x) => (
-                                <option key={x + 1} value={x + 1}>
-                                  {x + 1}
-                                </option>
-                              )
-                            )}
-                          </Form.Control>
+                          <Button variant="light" onClick={decreaseQty}>
+                            -
+                          </Button>
+                          <span className="mx-2">{qty}</span>
+                          <Button variant="light" onClick={increaseQty}>
+                            +
+                          </Button>
                         </Col>
                       </Row>
                     </ListGroup.Item>

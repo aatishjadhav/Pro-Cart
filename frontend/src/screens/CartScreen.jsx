@@ -24,8 +24,17 @@ const CartScreen = () => {
   const addToCartHandler = async (product, qty) => {
     dispatch(addToCart({ ...product, qty }));
   };
+
   const removeFromCartHandler = async (id) => {
     dispatch(removeFromCart(id));
+  };
+
+  const increaseQty = (item) => {
+    addToCartHandler(item, item.qty + 1);
+  };
+
+  const decreaseQty = (item) => {
+    addToCartHandler(item, item.qty - 1);
   };
 
   const checkOutHandler = () => {
@@ -53,19 +62,25 @@ const CartScreen = () => {
                   </Col>
                   <Col md={2}>${item.price}</Col>
                   <Col md={2}>
-                    <Form.Control
-                      as="select"
-                      value={item.qty}
-                      onChange={(e) =>
-                        addToCartHandler(item, Number(e.target.value))
-                      }
-                    >
-                      {[...Array(item.countInStock).keys()].map((x) => (
-                        <option key={x + 1} value={x + 1}>
-                          {x + 1}
-                        </option>
-                      ))}
-                    </Form.Control>
+                    <div className="d-flex align-items-center">
+                      <Button
+                        variant="light"
+                        className="mr-2"
+                        onClick={() => decreaseQty(item)}
+                        disabled={item.qty === 1}
+                      >
+                        -
+                      </Button>
+                      <span style={{margin: "5px"}}>{item.qty}</span>
+                      <Button
+                        variant="light"
+                        className="ml-2"
+                        onClick={() => increaseQty(item)}
+                        disabled={item.qty === item.countInStock}
+                      >
+                        +
+                      </Button>
+                    </div>
                   </Col>
                   <Col md={2}>
                     <Button
